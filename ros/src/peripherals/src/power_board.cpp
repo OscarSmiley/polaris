@@ -29,7 +29,7 @@ using AvgDataRes = peripherals::avg_data::Response;
 
 class power_board{
 public:
-    power_board(const std::string & port, int baud_rate = 115200, int timeout = 1000);
+    power_board(ros::NodeHandle nh, const std::string & port, int baud_rate = 115200, int timeout = 1000);
     ~power_board();
     bool get_powerboard_data(powerboardInfo & msg);
     bool power_enabler(PowerEnableReq &req, PowerEnableRes &res);
@@ -38,11 +38,14 @@ private:
     std::unique_ptr<serial::Serial> connection = nullptr;
     std::string write(const std::string & out, bool ignore_response = true, std::string eol = "\n");
     std::size_t write(const std::string & out, uint8_t* in, std::size_t read_len, std::string eol = "\n");
+    ros::ServiceClient client;
 };
 
-power_board::power_board(const std::string & port, int baud_rate, int timeout) {
+power_board::power_board(ros::NodeHandle nh, const std::string & port, int baud_rate, int timeout) {
     ROS_INFO("Connecting to power_board on port: %s", port.c_str());
     connection = std::unique_ptr<serial::Serial>(new serial::Serial(port, (u_int32_t) baud_rate, serial::Timeout::simpleTimeout(timeout)));
+    client = nh.serviceClient<monitor::GetSerialDevice>("/serial_manager/GetDevicePort");
+    
 }
 
 power_board::~power_board() {
