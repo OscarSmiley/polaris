@@ -45,6 +45,7 @@ power_board::power_board(ros::NodeHandle nh, const std::string & port, int baud_
     ROS_INFO("Connecting to power_board on port: %s", port.c_str());
     connection = std::unique_ptr<serial::Serial>(new serial::Serial(port, (u_int32_t) baud_rate, serial::Timeout::simpleTimeout(timeout)));
     client = nh.serviceClient<monitor::GetSerialDevice>("/serial_manager/GetDevicePort");
+    ros::Publisher pub = nh.advertise<peripherals::powerboard>("power_board_data", 1);
     
 }
 
@@ -254,7 +255,7 @@ int main(int argc, char ** argv)
 
     monitor::GetSerialDevice srv;
     nh.getParam("device_id", srv.request.device_id);
-    
+
 
     int loop_rate;
     nh.getParam("loop_rate", loop_rate);
