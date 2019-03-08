@@ -27,10 +27,10 @@ using PowerEnableRes = peripherals::power_enable::Response;
 using AvgDataReq = peripherals::avg_data::Request;
 using AvgDataRes = peripherals::avg_data::Response;
 
-class power_board{
+class powerBoard{
 public:
-    power_board(ros::NodeHandle nh, const std::string & port, int baud_rate = 115200, int timeout = 1000);
-    ~power_board();
+    powerBoard(ros::NodeHandle nh, const std::string & port, int baud_rate = 115200, int timeout = 1000);
+    ~powerBoard();
     bool get_powerboard_data(powerboardInfo & msg);
     bool power_enabler(PowerEnableReq &req, PowerEnableRes &res);
     bool average_ext_pressure(AvgDataReq &req, AvgDataRes &res);
@@ -38,22 +38,48 @@ private:
     std::unique_ptr<serial::Serial> connection = nullptr;
     std::string write(const std::string & out, bool ignore_response = true, std::string eol = "\n");
     std::size_t write(const std::string & out, uint8_t* in, std::size_t read_len, std::string eol = "\n");
+
     ros::ServiceClient client;
+    ros::Publisher pub;
+    ros::ServiceServer pwr_en;
+    ros::ServiceServer avg_ext_p 
 };
 
-power_board::power_board(ros::NodeHandle nh, const std::string & port, int baud_rate, int timeout) {
-    ROS_INFO("Connecting to power_board on port: %s", port.c_str());
+powerBoard::powerBoard(ros::NodeHandle nh, const std::string & port, int baud_rate, int timeout) {
+    ROS_INFO("Connecting to powerBoard on port: %s", port.c_str());
     connection = std::unique_ptr<serial::Serial>(new serial::Serial(port, (u_int32_t) baud_rate, serial::Timeout::simpleTimeout(timeout)));
+
     client = nh.serviceClient<monitor::GetSerialDevice>("/serial_manager/GetDevicePort");
-    ros::Publisher pub = nh.advertise<peripherals::powerboard>("power_board_data", 1);
-    
+    pub = nh.advertise<peripherals::powerboard>("power_board_data", 1);
+    pwr_en = nh.advertiseService("PowerEnable", &powerBoard::power_enabler, &device); 
+    avg_ext_p = nh.advertiseService("AverageExtPressure", &powerBoard::average_ext_pressure, &device);
+    nh.getParam("power_device_id", srv.request.device_id);
+    nh.getParam("device_id", srv.request.device_id);
+    ROS_INFO("Using Power Board on fd %s\n", srv.response.device_fd.c_str());
+   
+}
+void powerBoard::update(ros::NodeHandle nh){
+
+    monitor::GetSerialDevice srv;
+   
+    powerBoard device(srv.response.device_fd);
+
+    int loop_rate;
+    nh.getParam("loop_rate", loop_rate);
+
+    //Publish message to topic 
+    peripherals::powerboard msg;
+    if(device.get_powerboard_data(msg)) {
+        pub.publish(msg);
+    }
 }
 
-power_board::~power_board() {
+
+powerBoard::~powerBoard() {
     connection->close();
 }
 
-std::string power_board::write(const std::string & out, bool ignore_response, std::string eol)
+std::string powerBoard::write(const std::string & out, bool ignore_response, std::string eol)
 {
     // Flush the output, then the input (order matters, to flush any unwanted responses)
     connection->flushOutput();
@@ -72,7 +98,7 @@ std::string power_board::write(const std::string & out, bool ignore_response, st
     return connection->readline(65536ul, eol);
 }
 
-std::size_t power_board::write(const std::string & out, uint8_t* in, std::size_t read_len, std::string eol)
+std::size_t powerBoard::write(const std::string & out, uint8_t* in, std::size_t read_len, std::string eol)
 {
     // Flush the output, then the input (order matters, to flush any unwanted responses)
     connection->flushOutput();
@@ -86,7 +112,7 @@ std::size_t power_board::write(const std::string & out, uint8_t* in, std::size_t
     return connection->read(in, read_len);
 }
 
-bool power_board::get_powerboard_data(powerboardInfo &msg) {
+bool powerBoard::get_powerboard_data(powerboardInfo &msg) {
     // Get data from power board
     std::unique_ptr<uint8_t[]> currents(new uint8_t[RESPONSE_SIZE_CRA]);
     std::unique_ptr<uint8_t[]> voltages(new uint8_t[RESPONSE_SIZE_VTA]);
@@ -185,7 +211,7 @@ bool power_board::get_powerboard_data(powerboardInfo &msg) {
     return true;
 }
 
-bool power_board::power_enabler(PowerEnableReq &req, PowerEnableRes &res)
+bool powerBoard::power_enabler(PowerEnableReq &req, PowerEnableRes &res)
 {      
     // Command structure: PXEb -> X is the system, b is either 0 or 1
     // X can be: M for motors, 5 for 5V, T or 9 for the 9V/12V rail, or S for system
@@ -211,7 +237,7 @@ bool power_board::power_enabler(PowerEnableReq &req, PowerEnableRes &res)
     return true;
 }
 
-bool power_board::average_ext_pressure(AvgDataReq &req, AvgDataRes &res)
+bool powerBoard::average_ext_pressure(AvgDataReq &req, AvgDataRes &res)
 {
     // Use rate to determine read speed
     ros::Rate r(req.acq_rate);
