@@ -254,6 +254,7 @@ int main(int argc, char ** argv)
 
     monitor::GetSerialDevice srv;
     nh.getParam("device_id", srv.request.device_id);
+    
 
     int loop_rate;
     nh.getParam("loop_rate", loop_rate);
