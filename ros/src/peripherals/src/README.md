@@ -26,6 +26,8 @@ public:
   packageName(ros::NodeHandle &nh, struct packageNameCreateInfo &createinfo)
   {
     // Load all the values from nh.getParam("packageName_<parameter>", )
+    
+    // Load all the publishers/services/serviceclients here
   }
 
   void update()
