@@ -174,7 +174,7 @@ imu::imu(ros::NodeHandle &nh, const std::string & port, int baud_rate, int timeo
     pub = nh.advertise<peripherals::imu>(topic_name, topic_buffer_size);
 }
 
-imu::update (){
+void imu::update (){
      peripherals::imu msg;
         bool valid_msg = true;
         

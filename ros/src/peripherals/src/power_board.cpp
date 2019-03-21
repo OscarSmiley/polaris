@@ -66,7 +66,7 @@ powerBoard::powerBoard(ros::NodeHandle &nh, const std::string & port, int baud_r
     powerBoard device(srv.response.device_fd);
    
 }
-void powerBoard::update(ros::NodeHandle nh){
+void powerBoard::update(ros::NodeHandle &nh){
 
     int loop_rate;
     nh.getParam("loop_rate", loop_rate);
