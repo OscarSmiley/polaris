@@ -29,7 +29,7 @@ using HydroPhasesRes = peripherals::hydro_phases::Response;
 class hydrophones
 {       
 public:
-    hydrophones(const std::string port, int baud_rate = 115200, int timeout = 1000);
+    hydrophones( ros::NodeHandle &nh,const std::string port, int baud_rate = 115200, int timeout = 1000);
     ~hydrophones();
     std::string write(const std::string out, bool ignore_response = true, const std::string eol = "\n");
     bool get_raw_data(HydroDataReq &req, HydroDataRes &res);
@@ -46,9 +46,15 @@ private:
     std::vector<double*> fftw_inputs;
     std::vector<fftw_complex*> fftw_outputs;
     uint16_t fft_size;
+
+    ros::ServiceClient client;
+    ros::ServiceServer raw_data_srv;
+    ros::ServiceServer fft_data_srv;
+    ros::ServiceServer phase_data_srv;
+
 };
 
-hydrophones::hydrophones(const std::string port, int baud_rate, int timeout) :
+hydrophones::hydrophones(ros::NodeHandle &nh, const std::string port, int baud_rate, int timeout) :
     nh(ros::NodeHandle("~"))
 {       
     ROS_INFO("Connecting to hydrophones on port %s", port.c_str());
@@ -100,6 +106,25 @@ hydrophones::hydrophones(const std::string port, int baud_rate, int timeout) :
         fftw_forward_plans.push_back(
             fftw_plan_dft_r2c_1d(channel_size, &fftw_inputs.back()[0], &fftw_outputs.back()[0], FFTW_MEASURE));
     }
+
+    monitor::GetSerialDevice srv;
+    nh.getParam("device_id", srv.request.device_id);
+
+    client = nh.serviceClient<monitor::GetSerialDevice>("/serial_manager/GetDevicePort");
+    if(!client.call(srv)) {     
+        ROS_INFO("Couldn't get \"%s\" file descriptor. Shutting down", srv.request.device_id.c_str());
+        return 1;
+    }
+    ROS_INFO("Using Hydrophones on fd %s\n", srv.response.device_fd.c_str());
+    hydrophones device(srv.response.device_fd.c_str());
+
+    raw_data_srv = nh.advertiseService("getRawData", &hydrophones::get_raw_data, &device);
+    fft_data_srv = nh.advertiseService("getFFTData", &hydrophones::get_fft_data, &device);
+    phase_data_srv = nh.advertiseService("getChannelPhases", &hydrophones::get_hydro_phases, &device);
+}
+
+void hydrophones::update(ros::NodeHandle &nh){
+
 }
 
 hydrophones::~hydrophones()

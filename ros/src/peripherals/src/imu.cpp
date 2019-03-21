@@ -68,9 +68,12 @@ private:
     geometry_msgs::Vector3 velocity;
     geometry_msgs::Vector3 last_accel;
     double last_timestamp;
+    ros::ServiceClient client;
+    ros::ServiceServer vel_setter;
+    ros::Publisher pub;
 };
 
-imu::imu(const std::string & port, int baud_rate, int timeout) :
+imu::imu(ros::NodeHandle &nh, const std::string & port, int baud_rate, int timeout) :
     nh(ros::NodeHandle("~"))
 {
     velocity.x = 0.0;
@@ -139,7 +142,64 @@ imu::imu(const std::string & port, int baud_rate, int timeout) :
     }
     
     ROS_INFO("Gain scales: M:%f, A:%f, G:%f", mag_gain_scale, accel_gain_scale, gyro_gain_scale);
+
+     // Get the topic name and topic buffer size
+    std::string topic_name;
+    int topic_buffer_size;
+    nh.getParam("topic_name", topic_name);
+    nh.getParam("topic_buffer_size", topic_buffer_size);
+
+    // Get the device id
+    monitor::GetSerialDevice srv;
+    nh.getParam("device_id", srv.request.device_id);
+
+    // Get loop rate parameters
+    int publish_rate, updates_per_publish;
+    nh.getParam("publish_rate", publish_rate);
+
+    // Get the port the device is on
+    client = nh.serviceClient<monitor::GetSerialDevice>("/serial_manager/GetDevicePort");
+    if(!client.call(srv)) {     
+        ROS_ERROR("Couldn't get \"%s\" file descriptor. Shutting down", srv.request.device_id.c_str());
+        return 1;
+    }
+
+    ROS_INFO("Using IMU on fd \"%s\"", srv.response.device_fd.c_str());
+    imu dev(srv.response.device_fd);
+
+    // Declare service calls
+    vel_setter = nh.advertiseService("set_velocity", &imu::set_velocity, &dev);
+
+    // Declare publisher
+    pub = nh.advertise<peripherals::imu>(topic_name, topic_buffer_size);
 }
+
+imu::update (){
+     peripherals::imu msg;
+        bool valid_msg = true;
+        
+        // Get the Temperature of the IMU
+        valid_msg = dev.get_temperature(msg.temperature) && valid_msg;
+
+        // Get the Stabilised Euler Angles
+        valid_msg = dev.get_euler_stable(msg.euler_angles) && valid_msg;
+
+        // Get the Stabilised IMU Sensor Vectors
+        valid_msg = dev.get_mag_accel_gyro_stable(msg.stabilised_magnetic_field, 
+                msg.stabilised_acceleration, msg.compensated_angular_rate, msg.stabilised_vectors_timestamp) && valid_msg;
+
+        // Get the Instantaneous IMU Sensor Vectors
+        valid_msg = dev.get_mag_accel_gyro(msg.magnetic_field, msg.acceleration, msg.angular_rate, 
+                msg.instantaneous_vectors_timestamp) && valid_msg;
+
+        if(valid_msg) {   
+            // Publish message
+            pub.publish(msg);
+        }
+        else {  
+            ROS_ERROR("Invalid message.");
+        }
+} 
 
 imu::~imu() {
     connection->close();
