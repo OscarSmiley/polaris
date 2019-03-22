@@ -63,7 +63,7 @@ powerBoard::powerBoard(ros::NodeHandle &nh, const std::string & port, int baud_r
     nh.getParam("power_device_id", srv.request.device_id);
     nh.getParam("device_id", srv.request.device_id);
     ROS_INFO("Using Power Board on fd %s\n", srv.response.device_fd.c_str());
-    powerBoard device(srv.response.device_fd);
+    // powerBoard device(srv.response.device_fd);
    
 }
 void powerBoard::update(ros::NodeHandle &nh){
