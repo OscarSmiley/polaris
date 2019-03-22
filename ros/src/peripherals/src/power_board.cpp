@@ -29,7 +29,7 @@ using AvgDataRes = peripherals::avg_data::Response;
 
 class powerBoard{
 public:
-    powerBoard(ros::NodeHandle nh, const std::string & port, int baud_rate = 115200, int timeout = 1000);
+    powerBoard(ros::NodeHandle &nh, const std::string & port, int baud_rate = 115200, int timeout = 1000);
     ~powerBoard();
     bool get_powerboard_data(powerboardInfo & msg);
     bool power_enabler(PowerEnableReq &req, PowerEnableRes &res);
@@ -42,27 +42,31 @@ private:
     ros::ServiceClient client;
     ros::Publisher pub;
     ros::ServiceServer pwr_en;
-    ros::ServiceServer avg_ext_p 
+    ros::ServiceServer avg_ext_p;
 };
 
-powerBoard::powerBoard(ros::NodeHandle nh, const std::string & port, int baud_rate, int timeout) {
+powerBoard::powerBoard(ros::NodeHandle &nh, const std::string & port, int baud_rate, int timeout) {
     ROS_INFO("Connecting to powerBoard on port: %s", port.c_str());
     connection = std::unique_ptr<serial::Serial>(new serial::Serial(port, (u_int32_t) baud_rate, serial::Timeout::simpleTimeout(timeout)));
+    monitor::GetSerialDevice srv;
 
     client = nh.serviceClient<monitor::GetSerialDevice>("/serial_manager/GetDevicePort");
+    if (!client.call(srv)) {
+        ROS_INFO("Couldn't get \"%s\" file descripter. Shutting down", srv.request.device_id.c_str());
+        return 1;
+    }
+    
     pub = nh.advertise<peripherals::powerboard>("power_board_data", 1);
     pwr_en = nh.advertiseService("PowerEnable", &powerBoard::power_enabler, &device); 
     avg_ext_p = nh.advertiseService("AverageExtPressure", &powerBoard::average_ext_pressure, &device);
+
     nh.getParam("power_device_id", srv.request.device_id);
     nh.getParam("device_id", srv.request.device_id);
     ROS_INFO("Using Power Board on fd %s\n", srv.response.device_fd.c_str());
+    powerBoard device(srv.response.device_fd);
    
 }
 void powerBoard::update(ros::NodeHandle nh){
-
-    monitor::GetSerialDevice srv;
-   
-    powerBoard device(srv.response.device_fd);
 
     int loop_rate;
     nh.getParam("loop_rate", loop_rate);

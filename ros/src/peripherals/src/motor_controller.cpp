@@ -33,10 +33,10 @@ using MotorEnumsReq = peripherals::get_motor_enums::Request;
 using MotorEnumsRes = peripherals::get_motor_enums::Response;
 using rosserv = ros::ServiceServer;
 
-class motor_controller {
+class motorController {
 public:
-    motor_controller(const std::string & port, int baud_rate = 9600, int timeout = 1000);
-    ~motor_controller();
+    motorController(const std::string & port, int baud_rate = 9600, int timeout = 1000);
+    ~motorController();
     bool setMotorPWM(MotorReq &req, MotorRes &res);
     bool setAllMotorsPWM(MotorsReq &req, MotorsRes &res);
     bool stopMotor(MotorReq &req, MotorRes &res);
@@ -48,12 +48,19 @@ private:
     std::unique_ptr<serial::Serial> connection = nullptr;
     std::vector<double> pwm_multipliers;
     std::string write(const std::string & out, bool ignore_response = true, std::string eol = "\n");
+    ros::ServiceClient client;
+    ros::Publisher rpm_pub;
+    rosserv mr;
+    rosserv stp;
+    rosserv sm;
+    rosserv sam;
+    rosserv enums;
 };
 
-motor_controller::motor_controller(const std::string & port, int baud_rate, int timeout) :
+motorController::motorController(ros::NodeHandle &nh, const std::string & port, int baud_rate, int timeout) :
         pwm_multipliers(NUM_MOTORS)
 {
-    ROS_INFO("Connecting to motor_controller on port: %s", port.c_str());
+    ROS_INFO("Connecting to motorController on port: %s", port.c_str());
     connection = std::unique_ptr<serial::Serial>(new serial::Serial(port, (u_int32_t) baud_rate, serial::Timeout::simpleTimeout(timeout)));
 
     pwm_multipliers[peripherals::motor_enums::X_Right - 1] = X_RIGHT_MULT;
@@ -64,14 +71,46 @@ motor_controller::motor_controller(const std::string & port, int baud_rate, int 
     pwm_multipliers[peripherals::motor_enums::Z_Front_Left - 1] = Z_FRONT_LEFT_MULT;
     pwm_multipliers[peripherals::motor_enums::Z_Back_Right - 1] = Z_BACK_RIGHT_MULT;
     pwm_multipliers[peripherals::motor_enums::Z_Back_Left - 1] = Z_BACK_LEFT_MULT;
+
+    monitor::GetSerialDevice srv;
+    nh.getParam("device_id", srv.request.device_id);
+
+    client = nh.serviceClient<monitor::GetSerialDevice>("/serial_manager/GetDevicePort");
+    if (!client.call(srv)) {
+        ROS_ERROR("Couldn't get \"%s\" file descripter. Shutting down", srv.request.device_id.c_str());
+        return 1;
+    }
+
+    ROS_INFO("Using Motor Controller on fd %s\n", srv.response.device_fd.c_str());
+    motorController m(srv.response.device_fd);
+    rpm_pub = nh.advertise<peripherals::rpms>("MotorsRPMs", 1);
+
+     /* Setup all the Different services/commands which we  can call. Each service does its own error handling */
+    mr  = nh.advertiseService("setMotorPWM", &motor_controller::setMotorPWM, &m);
+    stp = nh.advertiseService("stopAllMotors", &motor_controller::stopAllMotors, &m);
+    sm  = nh.advertiseService("stopMotor", &motor_controller::stopMotor, &m);
+    sam = nh.advertiseService("setAllMotorsPWM", &motor_controller::setAllMotorsPWM, &m);
+    enums = nh.advertiseService("getMotorEnums", &motor_controller::getMotorEnums, &m);
+
 }
 
-motor_controller::~motor_controller() {
+void motorController::update(ros::NodeHandle &nh){
+    
+    int loop_rate;
+    nh.getParam("loop_rate", loop_rate);
+    peripherals::rpms rpms_msg;
+        if(m.getRPM(rpms_msg))
+        {
+            rpm_pub.publish(rpms_msg);
+        }
+}
+
+motorController::~motorController() {
     this->write("STP");
     connection->close();
 }
 
-std::string motor_controller::write(const std::string & out, bool ignore_response, std::string eol)
+std::string motorController::write(const std::string & out, bool ignore_response, std::string eol)
 {
     connection->flush();
     connection->write(out + eol);
@@ -82,7 +121,7 @@ std::string motor_controller::write(const std::string & out, bool ignore_respons
     return connection->readline(65536ul, eol);
 }
 
-bool motor_controller::setMotorPWM(MotorReq &req, MotorRes &res)
+bool motorController::setMotorPWM(MotorReq &req, MotorRes &res)
 {
     int16_t pwm = pwm_multipliers[req.motor_num - 1] * req.pwm;
     std::string out = "M" + std::to_string(req.motor_num);
@@ -102,7 +141,7 @@ bool motor_controller::setMotorPWM(MotorReq &req, MotorRes &res)
     return true;
 }
 
-bool motor_controller::setAllMotorsPWM(MotorsReq &req, MotorsRes &res)
+bool motorController::setAllMotorsPWM(MotorsReq &req, MotorsRes &res)
 {
     char motor_num = '1';
     std::string out = "MSA";
@@ -126,7 +165,7 @@ bool motor_controller::setAllMotorsPWM(MotorsReq &req, MotorsRes &res)
     return true;
 }
 
-bool motor_controller::getMotorEnums(MotorEnumsReq &req, MotorEnumsRes &res)
+bool motorController::getMotorEnums(MotorEnumsReq &req, MotorEnumsRes &res)
 {
     res.motors.X_Right_idx = peripherals::motor_enums::X_Right - 1;
     res.motors.X_Left_idx = peripherals::motor_enums::X_Left - 1;
@@ -138,20 +177,20 @@ bool motor_controller::getMotorEnums(MotorEnumsReq &req, MotorEnumsRes &res)
     res.motors.Z_Back_Right_idx = peripherals::motor_enums::Z_Back_Right - 1;
 }
 
-bool motor_controller::stopMotor(MotorReq &req, MotorRes &res)
+bool motorController::stopMotor(MotorReq &req, MotorRes &res)
 {
     std::string out = "SM" + std::to_string(req.motor_num);
     this->write(out);
     return true;
 }
 
-bool motor_controller::stopAllMotors(MotorReq &req, MotorRes &res)
+bool motorController::stopAllMotors(MotorReq &req, MotorRes &res)
 {
     this->write("STP");
     return true;
 }
 
-bool motor_controller::getRPM(peripherals::rpms &rpms_msg)
+bool motorController::getRPM(peripherals::rpms &rpms_msg)
 {
     std::string rpm_string = this->write("RVA", false);
     if (rpm_string.size() != (NUM_CHAR_PER_PWM * NUM_MOTORS) + 2) { //assuming eol is \r\n
@@ -180,7 +219,7 @@ int main(int argc, char ** argv)
 
     ROS_INFO("Using Motor Controller on fd %s\n", srv.response.device_fd.c_str());
 
-    motor_controller m(srv.response.device_fd);
+    motorController m(srv.response.device_fd);
     
     ros::Publisher rpm_pub = nh.advertise<peripherals::rpms>("MotorsRPMs", 1);
 
