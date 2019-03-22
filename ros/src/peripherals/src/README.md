@@ -35,7 +35,8 @@ public:
     // This is where publishers will do their publishing.
   }
   
-  // Suplementary functions.
+  // Suplementary functions. These could be private helper functions,
+  // or functions registered to a ros service/subscriber
 }
 ```
 
