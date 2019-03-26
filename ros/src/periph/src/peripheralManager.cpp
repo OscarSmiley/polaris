@@ -2,9 +2,6 @@
 
 #include <peripheralBase.hpp>
 
-// Includes for periperal modules.
-#include <powerBoard.h>
-
 /**
  *
  */
@@ -23,6 +20,9 @@ public:
   peripheralManager();
   ~peripheralManager();
 
+  template<class T>
+  int init_peripheral();
+  
   template<class T>
   int init_peripheral(peripheralCreateInfo &createinfo);
 
@@ -44,13 +44,17 @@ peripheralManager::~peripheralManager()
 }
 
 template<class T>
+int peripheralManager::init_peripheral();
+{
+  T peripheral(nodehandle);
+  this->peripherals.push_back(T)
+  return 0;
+}
+
+template<class T>
 int peripheralManager::init_peripheral(peripheralCreateInfo &createinfo = {std::string("null")});
 {
-  if(!createinfo.peripheral_name.compare(std::string("null")))
-    T peripheral(nodehandle, createinfo);
-  else
-    T peripheral(nodehandle);
-
+  T peripheral(nodehandle, createinfo);
   this->peripherals.push_back(T)
   return 0;
 }
