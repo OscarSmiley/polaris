@@ -17,9 +17,9 @@ namespace vision {namespace detectiion {
                 int n;
             };
             struct detectorResults{
-                int z_distance;//Distance from camera
-                int x_distance;//Right/left
-                int y_distance;//up/down
+                double r;
+                double theta;//Angle from z axis
+                double phi;//Angle from x axis
                 bool object_found;
 
             }
@@ -28,7 +28,7 @@ namespace vision {namespace detectiion {
             int wait_time = 20;
             int reset_time = 120;
             double focalLength = 1000; //Specific to camera
-            double real_gate_width = 5.5; //Update with real dimensions
+            double real_gate_width = 13.87; //Update with real dimensions
 
             /**
              * Currently Finds x direction of object in relation to camera and distance to object
@@ -51,6 +51,13 @@ namespace vision {namespace detectiion {
                     y_dis = -y_dis;
                 }
                 return y_dis;
+            }
+            detectorResults toPolar(double x, double y, double z){
+                detectorResults result;
+                result.r = sqrt(x*x + y*y + z*z);
+                result.theta = atan(sqrt(x*x +y*y)/z);
+                result.phi = atan(y/x);
+                return result;
             }
 
 
@@ -82,7 +89,7 @@ namespace vision {namespace detectiion {
                     cv::Point curr_point(object[0].x + object[0].width/2, object[0].y + object[0].height/2);
                     gate_result.object_found = true;
                     //calculate distance to object
-                    gate_result.z_distance = (real_gate_width*focalLength)/object[0].width;
+                    double z_distance = (real_gate_width*focalLength)/object[0].width;
 
 
                     //If best point exists find direction to object.
@@ -91,8 +98,9 @@ namespace vision {namespace detectiion {
                         //cv::circle(frame, best_point, 50, cv::Scalar(255,255,255), 2, 8, 0); For testing 
 
                         //Distance accuracy limited currently by Integer type
-                        gate_result.x_distance = xDistance(best_point.x, frame.cols/2, scale_factor);
-                        gate_result.y_distance = yDistance(best_point.y, frame.rows/2, scale_factor);
+                        double x_distance = xDistance(best_point.x, frame.cols/2, scale_factor);
+                        double y_distance = yDistance(best_point.y, frame.rows/2, scale_factor);
+                        gate_result = toPolar(xDistance,yDistance,zDistance);
                     }
                 } 
                 //If object not found
