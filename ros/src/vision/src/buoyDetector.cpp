@@ -19,6 +19,7 @@ private:
     Buoy_t buoy;
     u_int8_t min_match_count = 10;
     float ratio_thresh = 0.6f; // ratio for Lowe's ratio test
+    cv::Mat frame;
     cv::Rect buoy_rect; // rectangle around buoy
     struct Detector {
         cv::Mat buoy_img;
@@ -63,7 +64,7 @@ public:
     bool FindBuoy()
     {
         found_buoy = false;
-        cv::Mat frame, gray_frame;
+        cv::Mat gray_frame;
         cap >> frame;
 
         // Convert the frame to black and white
