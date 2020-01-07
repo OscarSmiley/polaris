@@ -7,40 +7,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="bootstrap-3.3.7-dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="/css/custom.css">
-  <script src="bootstrap-3.3.7-dist/js/jquery-3.3.1.min.js"></script>
-  <script src="bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
   <script type="text/javascript" src="js/libraries/eventemitter2.min.js"></script>
   <script type="text/javascript" src="js/libraries/roslib.min.js"></script>
   <script type="text/javascript" type="text/javascript">
     // Connecting to ROS
     // -----------------
-  
+
     var ros = new ROSLIB.Ros({
       url : 'ws://' + window.location.hostname + ':9090'
     });
 	console.log('ws://' + window.location.hostname + ':9090');
-  
+
     ros.on('connection', function() {
       console.log('Connected to websocket server.');
     });
-  
+
     ros.on('error', function(error) {
       console.log('Error connecting to websocket server: ', error);
     });
-  
+
     ros.on('close', function() {
       console.log('Connection to websocket server closed.');
     });
-  
+
     // Subscribing to a Topic
     // ----------------------
-  
+
     var depth_node = new ROSLIB.Topic({
       ros : ros,
       name : '/depth_sensor_node/depth',
       messageType : 'peripherals/depth'
     });
-  
+
     depth_node.subscribe(function(message) {
       //console.log('Received message on ' + depth_node.name + ': ' + message.temperature);
       $('#depth_sensor_depth').text(message.depth);
@@ -48,24 +46,27 @@
     });
 
   </script>
+  
+  <script src="bootstrap-3.3.7-dist/js/jquery-3.3.1.min.js"></script>
+  <script src="bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
 </head>
 <body>
 
 <nav class="navbar navbar-default">
   <div class="container-fluid">
     <div id="navbar-header" class="navbar-header">
-      
+
     </div>
     <ul class="nav navbar-nav">
       <!--<li class="active"><a href="#">Home</a></li>-->
     </ul>
   </div>
 </nav>
-<script> 
+<script>
   $(function(){
-    $("#navbar-header").load("/html_includes/headers.html"); 
+    $("#navbar-header").load("/html_includes/headers.html");
   });
-</script> 
+</script>
 
   <div class="container-fluid">
 
@@ -77,7 +78,7 @@
                 <th class="ros_topic_title"><h4>Power Board</h4></th>
               </tr>
             </thead>
-            <tbody>  
+            <tbody>
               <tr id="pb_batt_1_volt_row">
                 <td>Battery 1 Voltage</td>
                 <td>
@@ -144,8 +145,8 @@
             </tr>
           </tbody>
         </table>
-        
-        <table class="table table-hover"> 
+
+        <table class="table table-hover">
             <thead>
               <tr>
                 <th><h4>Nav Request</h4></th>
@@ -229,7 +230,7 @@
             </tr>
           </tbody>
         </table>
-    
+
         <h3>System Settings</h3>
         <table class="table table-hover">
             <thead>
@@ -270,7 +271,7 @@
               </tr>
             </tbody>
           </table>
-    
+
         <table class="table table-hover">
             <thead>
                 <tr>
@@ -325,7 +326,7 @@
                     <th class="ros_topic_title"><h4>IMU</h4></th>
                   </tr>
                 </thead>
-                <tbody>  
+                <tbody>
                   <tr>
                     <td>Stabilised Magnetic Field</td>
                     <td>
@@ -339,7 +340,7 @@
                     <td>
                       <p> X: <span id="stabilised_acceleration_x"></span> <sup>m</sup>&frasl;<sub>s<sup>2</sup></sub> </p>
                       <p> Y: <span id="stabilised_acceleration_y"></span> <sup>m</sup>&frasl;<sub>s<sup>2</sup></sub> </p>
-                      <p> Z: <span id="stabilised_acceleration_z"></span> <sup>m</sup>&frasl;<sub>s<sup>2</sup></sub> </p> 
+                      <p> Z: <span id="stabilised_acceleration_z"></span> <sup>m</sup>&frasl;<sub>s<sup>2</sup></sub> </p>
                     </td>
                   </tr>
                 <tr>
@@ -349,7 +350,7 @@
                   <p> Y: <span id="acceleration_y"></span> <sup>m</sup>&frasl;<sub>s<sup>2</sup></sub></p>
                   <p> Z: <span id="acceleration_z"></span> <sup>m</sup>&frasl;<sub>s<sup>2</sup></sub></p>
                 </td>
-              </tr>  
+              </tr>
               <tr>
                 <td>Compensated Angular Rate</td>
                 <td>
@@ -407,7 +408,7 @@
                 <th class="ros_topic_title"><h4>Velocity Vectors</h4></th>
               </tr>
             </thead>
-            <tbody>  
+            <tbody>
               <tr>
                 <td>Velocity</td>
                 <td>
@@ -421,7 +422,7 @@
                 <td>
                   <p> Roll: <span id="cs_ang_vel_roll"></span> <sup>&#176;</sup>&frasl;<sub>s</sub> </p>
                   <p> Pitch: <span id="cs_ang_vel_pitch"></span> <sup>&#176;</sup>&frasl;<sub>s</sub> </p>
-                  <p> Yaw: <span id="cs_ang_vel_yaw"></span> <sup>&#176;</sup>&frasl;<sub>s</sub> </p> 
+                  <p> Yaw: <span id="cs_ang_vel_yaw"></span> <sup>&#176;</sup>&frasl;<sub>s</sub> </p>
                 </td>
               </tr>
             <tr>
@@ -435,7 +436,7 @@
                 <th>Set RPM</th>
               </tr>
             </thead>
-            <tbody id="rpm-table-body">  
+            <tbody id="rpm-table-body">
             </tbody>
           </table>
         </div>
@@ -447,7 +448,7 @@
                 <th class="ros_topic_title"><h4>PWMS</h4></th>
               </tr>
             </thead>
-            <tbody id="pwm-table-body">  
+            <tbody id="pwm-table-body">
             </tbody>
           </table>
       </div>
@@ -475,7 +476,7 @@
             </button>
           <table class="table table-hover">
             <thead>
-              
+
             </thead>
           </table>
           <table class="table table-hover">
@@ -541,8 +542,8 @@
           </div>
         </div>
       </div>
-      
-  
+
+
 
 </body>
 
@@ -580,7 +581,6 @@
 
 }
 </style>
-
 <script src="js/services/power_board_services.js" type="text/javascript" type="text/javascript"></script>
 <script src="js/services/imu_vector_reset.js" type="text/javascript" type="text/javascript"></script>
 <script src="js/services/calibrate_depth.js" type="text/javascript" type="text/javascript"></script>
