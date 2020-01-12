@@ -16,17 +16,10 @@ public:
     bool update();
 
     const cv::Mat& getFrameFront();
-    const cv::Mat& getFrameBottom();
-    const cv::Mat& getFrameTop();
 
 private:
     cv::Mat frame_front;
-    cv::Mat frame_bottom;
-    cv::Mat frame_top;
-
     cv::VideoCapture input_front;
-    cv::VideoCapture input_bottom;
-    cv::VideoCapture input_top;
 };
 
 #endif

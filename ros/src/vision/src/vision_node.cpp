@@ -48,8 +48,9 @@ public:
     VisionSystem(ros::NodeHandle& nh) : 
         nh_(nh), 
         cameraInput_(),
-        gateDetector_(cameraInput_, "../cascades/GateCascades.xml"),
-        buoyDetector_(cameraInput_, ""),
+        /* Ensure fully-qualified path is used for files */
+        gateDetector_(cameraInput_, "../cascades/GateCascade.xml"),
+        buoyDetector_(cameraInput_, "Jiangshi"),
         pathDetector_(cameraInput_, ""),
         enabledDetectors_(EnabledDetector::NONE)
     {
@@ -87,7 +88,6 @@ public:
                     msg_.y = pathDetector_.getYFront();
                     msg_.z = pathDetector_.getZFront();
                     break;
-                case EnabledDetector::NONE:
                 default:
                     msg_.x = 0;
                     msg_.y = 0;

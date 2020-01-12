@@ -116,7 +116,7 @@ bool motor_controller::setAllMotorsPWM(MotorsReq &req, MotorsRes &res)
         if (pwm > MAX_MOTOR_VALUE) {
             pwm = MAX_MOTOR_VALUE;
         }
-        out.push_back(dir); 
+        out.push_back(dir);
         out.push_back(((char)(pwm/100) + '0'));
         out.push_back(((char)((pwm%100)/10) + '0'));
         out.push_back(((char)(pwm%10) + '0'));
@@ -172,6 +172,9 @@ int main(int argc, char ** argv)
     monitor::GetSerialDevice srv;
     nh.getParam("device_id", srv.request.device_id);
 
+    // Wait until serial device manager is ready
+    ros::service::waitForService("/serial_manager/GetDevicePort", -1);
+
     ros::ServiceClient client = nh.serviceClient<monitor::GetSerialDevice>("/serial_manager/GetDevicePort");
     if (!client.call(srv)) {
         ROS_ERROR("Couldn't get \"%s\" file descripter. Shutting down", srv.request.device_id.c_str());
@@ -181,7 +184,7 @@ int main(int argc, char ** argv)
     ROS_INFO("Using Motor Controller on fd %s\n", srv.response.device_fd.c_str());
 
     motor_controller m(srv.response.device_fd);
-    
+
     ros::Publisher rpm_pub = nh.advertise<peripherals::rpms>("MotorsRPMs", 1);
 
     /* Setup all the Different services/commands which we  can call. Each service does its own error handling */
@@ -210,4 +213,3 @@ int main(int argc, char ** argv)
 
     return 0;
 }
-

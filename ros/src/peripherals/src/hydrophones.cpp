@@ -27,7 +27,7 @@ using HydroPhasesReq = peripherals::hydro_phases::Request;
 using HydroPhasesRes = peripherals::hydro_phases::Response;
 
 class hydrophones
-{       
+{
 public:
     hydrophones(const std::string port, int baud_rate = 115200, int timeout = 1000);
     ~hydrophones();
@@ -50,7 +50,7 @@ private:
 
 hydrophones::hydrophones(const std::string port, int baud_rate, int timeout) :
     nh(ros::NodeHandle("~"))
-{       
+{
     ROS_INFO("Connecting to hydrophones on port %s", port.c_str());
     connection = std::unique_ptr<serial::Serial>(new serial::Serial(port, (u_int32_t)baud_rate, serial::Timeout::simpleTimeout(timeout)));
 
@@ -67,7 +67,7 @@ hydrophones::hydrophones(const std::string port, int baud_rate, int timeout) :
     out += (packet_size < 10 ? "0" : "");
     out += std::to_string(packet_size);
     std::string p_size = write(out, false);
-   
+
     /* Set the data size */
     out = "DS";
     out += (data_size < 10000 ? "0" : "");
@@ -79,14 +79,14 @@ hydrophones::hydrophones(const std::string port, int baud_rate, int timeout) :
 
     uint16_t packet_size_actual;
     if(p_size.length() >= 4)
-    {   
+    {
         packet_size_actual = (p_size[1] << 8) | p_size[0];
         ROS_INFO("Packet Size is set to %u", packet_size_actual);
     }
-   
+
     uint16_t data_size_actual;
     if(d_size.length() >= 4)
-    {   
+    {
         data_size_actual = (d_size[1] << 8) | d_size[0];
         ROS_INFO("Data size is set to %u", data_size_actual);
     }
@@ -103,7 +103,7 @@ hydrophones::hydrophones(const std::string port, int baud_rate, int timeout) :
 }
 
 hydrophones::~hydrophones()
-{      
+{
     connection->flush();
     connection->close();
 
@@ -116,13 +116,13 @@ hydrophones::~hydrophones()
 }
 
 std::string hydrophones::write(const std::string out, bool ignore_response, const std::string eol)
-{   
+{
     connection->flush();
     connection->write(out + eol);
     connection->flushOutput();
 
-    if(ignore_response) 
-    {   
+    if(ignore_response)
+    {
         return "";
     }
 
@@ -162,7 +162,7 @@ bool hydrophones::get_hydro_phases(HydroPhasesReq &req, HydroPhasesRes &res)
 }
 
 bool hydrophones::get_raw_data(HydroDataReq &req, HydroDataRes &res)
-{       
+{
     return acquire_hydro_data(res.hydro);
 }
 
@@ -170,7 +170,7 @@ bool hydrophones::get_fft_data(HydroFFTsReq &req, HydroFFTsRes &res)
 {
     return compute_fft(res.hydro_channel);
 }
-    
+
 bool hydrophones::compute_fft(std::vector<peripherals::hydro_fft> &hydro_ffts)
 {
     // Acquire data from the hydrophones
@@ -180,7 +180,7 @@ bool hydrophones::compute_fft(std::vector<peripherals::hydro_fft> &hydro_ffts)
         ROS_ERROR("Failed to acquire hydrophone data for FFT computation");
         return false;
     }
-   
+
     // Compute the FFT of that data
     hydro_ffts = std::vector<peripherals::hydro_fft>(hydro_data.size());
     for(int i = 0; i < hydro_data.size(); i++)
@@ -207,14 +207,14 @@ bool hydrophones::compute_fft(std::vector<peripherals::hydro_fft> &hydro_ffts)
 }
 
 bool hydrophones::acquire_hydro_data(std::vector<peripherals::hydro> &hydro_data)
-{  
+{
     // Initialize the list with all the data
     for(int i = 0; i < NUM_HYDROPHONES; i++)
-    {   
+    {
         peripherals::hydro data_list;
         hydro_data.push_back(data_list);
     }
-    
+
     uint8_t header[PKT_HEADER_SIZE];
     write("ADCDR");
 
@@ -223,11 +223,11 @@ bool hydrophones::acquire_hydro_data(std::vector<peripherals::hydro> &hydro_data
     uint8_t packet_count = 0;
     uint8_t resend_count = 0;
     do
-    {  
+    {
         // Get the packet header and relevant information
         uint8_t lines;
         if((lines = connection->read(header, PKT_HEADER_SIZE)) != PKT_HEADER_SIZE)
-        {       
+        {
             ROS_ERROR("Did not read enough lines! Read only %u lines.", lines);
         }
         uint32_t crc = (header[3] << 24) | (header[2] << 16) | (header[1] << 8) | header[0];
@@ -245,7 +245,7 @@ bool hydrophones::acquire_hydro_data(std::vector<peripherals::hydro> &hydro_data
         // Check to see if there were any communication errors
         uint32_t host_crc = stm32f4_crc32(packet_data, packet_size);
         if(host_crc != crc)
-        {      
+        {
             delete[] packet_data;
             if(resend_count < MAX_RESENDS)
             {
@@ -256,12 +256,12 @@ bool hydrophones::acquire_hydro_data(std::vector<peripherals::hydro> &hydro_data
                 continue;
             }
             else
-            {   
+            {
                 ROS_ERROR("Communication error. Resend count exceeded maximum allowed resends. Failed to read data from hydrophones");
                 return false;
             }
         }
-        
+
         // Signal the beginning of the next packet transfer
         if(packet_idx < (packet_count - 1))
         {
@@ -272,15 +272,15 @@ bool hydrophones::acquire_hydro_data(std::vector<peripherals::hydro> &hydro_data
 
         // Append data to output while we wait
         for(int i = 0; i < (packet_size/2); i++, data_index++)
-        {   
-            hydro_data[data_index % NUM_HYDROPHONES].raw_data.push_back((packet_data[(i*2)+1] << 8) | packet_data[i*2]); 
+        {
+            hydro_data[data_index % NUM_HYDROPHONES].raw_data.push_back((packet_data[(i*2)+1] << 8) | packet_data[i*2]);
         }
 
         delete[] packet_data;
 
     } while(packet_idx < (packet_count - 1));
 
-    connection->flush(); 
+    connection->flush();
 
     return true;
 }
@@ -289,24 +289,24 @@ uint32_t hydrophones::stm32f4_crc32(uint8_t* data, size_t data_len, uint32_t crc
 {
     // Make sure data length is a multiple of 4
     if(data_len % 4)
-    {   
+    {
         ROS_ERROR("Invalid data for STM32F4 CRC. Data length must be a multiple of 4.");
         return 0;
     }
 
     // Compute the CRC 32 bits at a time
     for(int i = 0; i < (data_len/4); i++)
-    {  
+    {
         uint32_t uint32_datum = (data[(i*4)+3] << 24) | (data[(i*4)+2] << 16) | (data[(i*4)+1] << 8) | data[(i*4)];
         crc = crc ^ uint32_datum;
         for(int j = 0; j < 32; j++)
-        {      
+        {
             if(crc & 0x80000000)
-            {      
+            {
                 crc = (crc << 1) ^ 0x04C11DB7;
             }
             else
-            {   
+            {
                 crc = crc << 1;
             }
         }
@@ -316,16 +316,18 @@ uint32_t hydrophones::stm32f4_crc32(uint8_t* data, size_t data_len, uint32_t crc
 }
 
 int main(int argc, char** argv)
-{       
+{
     ros::init(argc, argv, "hydrophones");
     ros::NodeHandle nh("~");
 
     monitor::GetSerialDevice srv;
     nh.getParam("device_id", srv.request.device_id);
 
+    // Wait until serial device manager is ready
+    ros::service::waitForService("/serial_manager/GetDevicePort", -1);
 
     ros::ServiceClient client = nh.serviceClient<monitor::GetSerialDevice>("/serial_manager/GetDevicePort");
-    if(!client.call(srv)) {     
+    if(!client.call(srv)) {
         ROS_INFO("Couldn't get \"%s\" file descriptor. Shutting down", srv.request.device_id.c_str());
         return 1;
     }
@@ -337,7 +339,7 @@ int main(int argc, char** argv)
     ros::ServiceServer raw_data_srv = nh.advertiseService("getRawData", &hydrophones::get_raw_data, &device);
     ros::ServiceServer fft_data_srv = nh.advertiseService("getFFTData", &hydrophones::get_fft_data, &device);
     ros::ServiceServer phase_data_srv = nh.advertiseService("getChannelPhases", &hydrophones::get_hydro_phases, &device);
-        
+
     ros::spin();
 
     return 0;

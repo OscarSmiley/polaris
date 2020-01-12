@@ -30,7 +30,7 @@ private:
     // ROS
     ros::NodeHandle nh;
 
-    // Controllers 
+    // Controllers
     std::vector<std::unique_ptr<velocity_controller>> thruster_controllers;
 
     // Messages
@@ -133,9 +133,9 @@ bool rpm_controller::control_en(RpmCtrlEnReq &req, RpmCtrlEnRes &res)
 
     // If control system is being disabled, reset all controllers
     if(!req.enable)
-    {   
+    {
         for(int i = 0; i < thruster_controllers.size(); i++)
-        {       
+        {
             thruster_controllers[i]->reset();
         }
     }
@@ -159,6 +159,10 @@ int main(int argc, char** argv) {
     ros::init(argc, argv, "rpm_controller");
     ros::NodeHandle nh("~");
     rpm_controller rpm_ctrl;
+
+    // Wait until motor controller is ready
+		ros::service::waitForService("/motor_controller/setAllMotorsPWM", -1);
+
     ros::Subscriber des_rpms = nh.subscribe<peripherals::rpms>("/nav/rpms", 1, &rpm_controller::receive_desired_rpms, &rpm_ctrl);
     ros::Subscriber act_rpms = nh.subscribe<peripherals::rpms>("/motor_controller/MotorsRPMs", 1, &rpm_controller::receive_actual_rpms, &rpm_ctrl);
     ros::ServiceClient mtrs_set_all = nh.serviceClient<peripherals::motors>("/motor_controller/setAllMotorsPWM");
@@ -181,11 +185,11 @@ int main(int argc, char** argv) {
 
         // Set the motors
         mtrs_set_all.call(srv);
-       
+
         // ROS stuff
         ros::spinOnce();
         r.sleep();
-    }   
+    }
 
     return 0;
 }

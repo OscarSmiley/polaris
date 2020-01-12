@@ -42,9 +42,9 @@ public:
     ~imu();
     bool get_temperature(double &temperature);
     bool get_euler_stable(peripherals::orientation &euler_angles);
-    bool get_mag_accel_gyro_stable(geometry_msgs::Vector3 &mag, geometry_msgs::Vector3 &accel, 
+    bool get_mag_accel_gyro_stable(geometry_msgs::Vector3 &mag, geometry_msgs::Vector3 &accel,
             geometry_msgs::Vector3 &gyro, double &time);
-    bool get_mag_accel_gyro(geometry_msgs::Vector3 &mag, geometry_msgs::Vector3 &accel, 
+    bool get_mag_accel_gyro(geometry_msgs::Vector3 &mag, geometry_msgs::Vector3 &accel,
             geometry_msgs::Vector3 &gyro, double &time);
     void get_velocity(geometry_msgs::Vector3 &velocity_vector);
     bool set_velocity(VelSetReq &req, VelSetRes &res);
@@ -109,10 +109,10 @@ imu::imu(const std::string & port, int baud_rate, int timeout) :
     write(READ_EEPROM_CMD);
     write(MAG_GAIN_SCALE_ADDR >> 8);
     write(MAG_GAIN_SCALE_ADDR & 0xFF, READ_EEPROM_SIZE);
-    if(verify_response(READ_EEPROM_SIZE)) {     
+    if(verify_response(READ_EEPROM_SIZE)) {
         mag_gain_scale = ((int16_t) ((response_buffer[1] << 8) | response_buffer[2]));
     }
-    else {      
+    else {
         ROS_ERROR("Bad Checksum, failed to get MagGainScale");
     }
 
@@ -120,10 +120,10 @@ imu::imu(const std::string & port, int baud_rate, int timeout) :
     write(READ_EEPROM_CMD);
     write(ACCEL_GAIN_SCALE_ADDR >> 8);
     write(ACCEL_GAIN_SCALE_ADDR & 0xFF, READ_EEPROM_SIZE);
-    if(verify_response(READ_EEPROM_SIZE)) {     
+    if(verify_response(READ_EEPROM_SIZE)) {
         accel_gain_scale = ((int16_t) ((response_buffer[1] << 8) | response_buffer[2]));
     }
-    else {      
+    else {
         ROS_ERROR("Bad Checksum, failed to get AccelGainScale");
     }
 
@@ -131,13 +131,13 @@ imu::imu(const std::string & port, int baud_rate, int timeout) :
     write(READ_EEPROM_CMD);
     write(GYRO_GAIN_SCALE_ADDR >> 8);
     write(GYRO_GAIN_SCALE_ADDR & 0xFF, READ_EEPROM_SIZE);
-    if(verify_response(READ_EEPROM_SIZE)) {     
+    if(verify_response(READ_EEPROM_SIZE)) {
         gyro_gain_scale = ((int16_t) ((response_buffer[1] << 8) | response_buffer[2]));
     }
-    else {      
+    else {
         ROS_ERROR("Bad Checksum, failed to get GyroGainScale");
     }
-    
+
     ROS_INFO("Gain scales: M:%f, A:%f, G:%f", mag_gain_scale, accel_gain_scale, gyro_gain_scale);
 }
 
@@ -150,7 +150,7 @@ void imu::write(uint8_t command, int response_bytes)
 {
     connection->write(&command, 1);
     //connection->flushInput();
-    
+
     // Put result into vector if need be
     if (response_bytes) {
         connection->read(response_buffer, (size_t) response_bytes);
@@ -161,11 +161,11 @@ bool imu::verify_response(int response_bytes) {
     if((response_bytes > 0) && (response_bytes <= RESPONSE_MAX_SIZE)) {
         // Each response contains a checksum (last two bytes)
         uint16_t response_checksum = (response_buffer[response_bytes - 2] << 8) | (response_buffer[response_bytes - 1]);
-        
+
         // Can compute the checksum by summing all bytes preceding the checksum as 16 bit numbers where
         // MSB of header is 0.
         uint16_t computed_checksum = response_buffer[0];
-        for( int i = 1; i < (response_bytes - 2); i+=2) {    
+        for( int i = 1; i < (response_bytes - 2); i+=2) {
             computed_checksum += (response_buffer[i] << 8) | (response_buffer[i+1]);
         }
 
@@ -186,19 +186,19 @@ bool imu::get_temperature(double &temperature) {
         ROS_INFO("Bad checksum");
         return false;
     }
-    
+
     // Compute temperature (first 2 non-header bytes of response)
     temperature = (( (double)(((int) response_buffer[1] << 8) | (int) response_buffer[2]) * 5.0 / 65536) - 0.5) * 100.0;
 
     return true;
 }
 
-bool imu::get_euler_stable(peripherals::orientation &euler_angles) {  
+bool imu::get_euler_stable(peripherals::orientation &euler_angles) {
     // Send stable euler angles command
     write(EULER_STAB_CMD, EULER_STAB_SIZE);
 
     // Verify the checksum of the response
-    if(!verify_response(EULER_STAB_SIZE)) {      
+    if(!verify_response(EULER_STAB_SIZE)) {
         ROS_INFO("Bad Checksum");
         return false;
     }
@@ -212,9 +212,9 @@ bool imu::get_euler_stable(peripherals::orientation &euler_angles) {
 
 bool imu::get_mag_accel_gyro_stable
 (
-    geometry_msgs::Vector3 &mag, 
-    geometry_msgs::Vector3 &accel, 
-    geometry_msgs::Vector3 &gyro, 
+    geometry_msgs::Vector3 &mag,
+    geometry_msgs::Vector3 &accel,
+    geometry_msgs::Vector3 &gyro,
     double &time
 )
 {
@@ -222,7 +222,7 @@ bool imu::get_mag_accel_gyro_stable
     write(MAG_ACCEL_GYRO_STAB_CMD, MAG_ACCEL_GYRO_STAB_SIZE);
 
     // Verify the checksum of the response
-    if(!verify_response(MAG_ACCEL_GYRO_STAB_SIZE)) {      
+    if(!verify_response(MAG_ACCEL_GYRO_STAB_SIZE)) {
         ROS_INFO("Bad Checksum");
         return false;
     }
@@ -250,17 +250,17 @@ bool imu::get_mag_accel_gyro_stable
 
 bool imu::get_mag_accel_gyro
 (
-    geometry_msgs::Vector3 &mag, 
-    geometry_msgs::Vector3 &accel, 
-    geometry_msgs::Vector3 &gyro, 
+    geometry_msgs::Vector3 &mag,
+    geometry_msgs::Vector3 &accel,
+    geometry_msgs::Vector3 &gyro,
     double &time
-) 
-{        
+)
+{
     // Send the command to get instantaneous vectors
     write(MAG_ACCEL_GYRO_CMD, MAG_ACCEL_GYRO_SIZE);
 
     // Verify the checksum of the response
-    if(!verify_response(MAG_ACCEL_GYRO_SIZE)) {      
+    if(!verify_response(MAG_ACCEL_GYRO_SIZE)) {
         ROS_INFO("Bad Checksum");
         return false;
     }
@@ -324,7 +324,7 @@ void imu::update_velocity()
     }
 
     // Check if this is the first time the function was called
-    if(!valid_data) {   
+    if(!valid_data) {
         last_accel = accel_true;
         last_timestamp = timestamp;
         valid_data = true;
@@ -334,10 +334,10 @@ void imu::update_velocity()
     // This chunk of code is necessary for timestamp overflows
     double this_time;
     // Check for timestamp overflow
-    if(timestamp < last_timestamp) {    
+    if(timestamp < last_timestamp) {
         this_time = timestamp + 429490.2;
     }
-    else {      
+    else {
         this_time = timestamp;
     }
 
@@ -357,7 +357,7 @@ void imu::update_velocity()
     last_timestamp = timestamp;
 }
 
-void imu::get_velocity(geometry_msgs::Vector3 &velocity_vector) {      
+void imu::get_velocity(geometry_msgs::Vector3 &velocity_vector) {
     velocity_vector = this->velocity;
 }
 
@@ -392,9 +392,12 @@ int main(int argc, char ** argv)
     int publish_rate, updates_per_publish;
     nh.getParam("publish_rate", publish_rate);
 
+    // Wait until serial device manager is ready
+    ros::service::waitForService("/serial_manager/GetDevicePort", -1);
+
     // Get the port the device is on
     ros::ServiceClient client = nh.serviceClient<monitor::GetSerialDevice>("/serial_manager/GetDevicePort");
-    if(!client.call(srv)) {     
+    if(!client.call(srv)) {
         ROS_ERROR("Couldn't get \"%s\" file descriptor. Shutting down", srv.request.device_id.c_str());
         return 1;
     }
@@ -413,7 +416,7 @@ int main(int argc, char ** argv)
     while(ros::ok()) {
         peripherals::imu msg;
         bool valid_msg = true;
-        
+
         // Get the Temperature of the IMU
         valid_msg = dev.get_temperature(msg.temperature) && valid_msg;
 
@@ -421,18 +424,18 @@ int main(int argc, char ** argv)
         valid_msg = dev.get_euler_stable(msg.euler_angles) && valid_msg;
 
         // Get the Stabilised IMU Sensor Vectors
-        valid_msg = dev.get_mag_accel_gyro_stable(msg.stabilised_magnetic_field, 
+        valid_msg = dev.get_mag_accel_gyro_stable(msg.stabilised_magnetic_field,
                 msg.stabilised_acceleration, msg.compensated_angular_rate, msg.stabilised_vectors_timestamp) && valid_msg;
 
         // Get the Instantaneous IMU Sensor Vectors
-        valid_msg = dev.get_mag_accel_gyro(msg.magnetic_field, msg.acceleration, msg.angular_rate, 
+        valid_msg = dev.get_mag_accel_gyro(msg.magnetic_field, msg.acceleration, msg.angular_rate,
                 msg.instantaneous_vectors_timestamp) && valid_msg;
 
-        if(valid_msg) {   
+        if(valid_msg) {
             // Publish message
             pub.publish(msg);
         }
-        else {  
+        else {
             ROS_ERROR("Invalid message.");
         }
 
@@ -442,4 +445,3 @@ int main(int argc, char ** argv)
 
     return 0;
 }
-

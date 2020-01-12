@@ -3,10 +3,13 @@
 
 #include "opencv2/opencv.hpp"
 #include "opencv2/xfeatures2d.hpp"
+#include "ros/console.h"
 #include <stdio.h>
 
 BuoyDetector::BuoyDetector(CameraInput& input, std::string buoy_type) : camera_input(input)
 {
+    /* IMPORTANT: Must use fully qualified file path for ROS as relative file paths 
+       navigate from $ROS_HOME */
     if(buoy_type == "Jiangshi") 
         detector.buoy_img = cv::imread("../images/Jiangshi_lg.png", cv::IMREAD_GRAYSCALE);
     else if(buoy_type == "Aswang")
@@ -15,6 +18,12 @@ BuoyDetector::BuoyDetector(CameraInput& input, std::string buoy_type) : camera_i
         detector.buoy_img = cv::imread("../images/Draugr_lg.png", cv::IMREAD_GRAYSCALE);
     else if(buoy_type == "Vetalas") 
         detector.buoy_img = cv::imread("../images/Vetalas_lg.png", cv::IMREAD_GRAYSCALE);
+    
+    if (detector.buoy_img.data == NULL) {
+        ROS_INFO("Unable to process image: Either image was not found, or image is empty");
+        return;
+    }
+    
     detector.sift = cv::xfeatures2d::SIFT::create();
     detector.matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED);
     detector.sift->detectAndCompute(detector.buoy_img, cv::noArray(), detector.keypoints1, detector.descriptors1);
@@ -31,8 +40,13 @@ bool BuoyDetector::update()
     // Convert input.getFrameFront() to black and white
     cv::cvtColor(camera_input.getFrameFront(), gray_frame, cv::COLOR_BGR2GRAY);
 
-    
     detector.sift->detectAndCompute(gray_frame, cv::noArray(), detector.keypoints2, detector.descriptors2);
+    
+    // If no descriptors found, then return false, no use further in method
+    if (detector.descriptors2.empty()) {
+        return found_buoy;
+    }
+    
     // matching the descriptor vectors with a FLANN based matcher
     std::vector< std::vector<cv::DMatch> > knn_matches;
     detector.matcher->knnMatch(detector.descriptors1, detector.descriptors2, knn_matches, 2);

@@ -154,7 +154,7 @@ control_system::~control_system()
   \brief Updates the current navigation request with the one most recently published.
   \param msg The most recent navigation request.
  */
-void control_system::receive_nav_request(const navigation::nav_request::ConstPtr &msg) 
+void control_system::receive_nav_request(const navigation::nav_request::ConstPtr &msg)
 {
     current_request = msg;
 }
@@ -194,6 +194,10 @@ bool control_system::calibrate_surface_depth(AvgDataReq &req, AvgDataRes &res)
     // Copy service message over and request average external pressure
     peripherals::avg_data srv;
     srv.request = req;
+
+    // Wait 10s until power_board is ready
+		ros::service::waitForService("/power_board/AverageExtPressure", 10.0);
+
     ros::ServiceClient ext_pres_client = nh.serviceClient<peripherals::avg_data>("/power_board/AverageExtPressure");
 
     if(!ext_pres_client.call(srv))
