@@ -62,3 +62,12 @@ find_package(OpenCV 3 REQUIRED)
 add_executable(${PROJECT_NAME}_node src/vision_node.cpp src/CameraInput.cpp src/BuoyDetector.cpp src/GateDetector.cpp src/PathDetector.cpp src/Distance.cpp src/Filter.cpp)
 add_dependencies(${PROJECT_NAME}_node ${vision_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+#manualy added sender and reciever executables for camera testing
+add_executable(sender src/sender.cpp)
+add_dependencies(sender ${vision_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(sender ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(reciever src/reciever.cpp)
+add_dependencies(reciever ${vision_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(reciever ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+
