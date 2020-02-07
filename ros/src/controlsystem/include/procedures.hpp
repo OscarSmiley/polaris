@@ -68,8 +68,8 @@ class Procedure {
 		virtual void unprep() {
 		}
 };
-
-  // GateLocateProcedure updates the navigation heading from the vector provided by the vision GateDector class
+/*
+// GateLocateProcedure updates the navigation heading from the vector provided by the vision GateDector class
 class GateLocateProcedure: public Procedure {
 
 		ros::NodeHandle n;
@@ -139,6 +139,102 @@ class GateLocateProcedure: public Procedure {
       // and adjust depth based on z and the distance to the gate, unless that is ok as it is.
       // Once the yaw is set and the sub rotates (see rotation example below), Then STOP.
       // Then we will return NEXT (forward procedure to go forward through the gate).
+
+			navigation::nav_request srv;
+			srv.request.depth = current_heading.direction.z + z;
+			srv.request.yaw_rate = 0.0;
+			srv.request.forwards_velocity = 0.0;
+			srv.request.sideways_velocity = 0.0;
+
+			if (!set_heading.call(srv))
+			{
+				ROS_WARN("Heading service call failed.");
+        return Procedure::ReturnCode::CONTINUE;
+			}
+
+      if(std::abs(current_heading.orientation.yaw - start_yaw) < 0.1) {
+        navigation::full_stop stop;
+        if(!full_stop_srv.call(stop)) {
+          ROS_WARN("Full stop service call failed.");
+        }
+        return Procedure::ReturnCode::NEXT;
+      }
+
+      return Procedure::ReturnCode::CONTINUE;
+		}
+};
+*/
+
+// ObjectLocateProcedure updates the navigation heading from the vector provided by the vision ObjectDector class
+class ObjectLocateProcedure: public Procedure {
+
+		ros::NodeHandle n;
+    ros::ServiceClient full_stop_srv;
+		ros::ServiceClient set_heading;
+    ros::ServiceClient objet_detection;
+		ros::Subscriber heading;
+    ros::Subscriber vision_vector;
+    navigation::nav current_heading;
+		navigation::nav nav_heading;
+
+    bool yaw_recorded;
+    double start_yaw;
+		bool has_object_vector;
+    bool has_heading;
+
+    uint16_t x, y, z;
+
+	public:
+
+    void vectorUpdateCallback(const vision::vector::ConstPtr& message)
+    {
+
+      if (message) {
+        x = message->x;
+        y = message->y;
+        z = message->z;
+        has_object_vector = true;
+      }
+    }
+
+    void updateHeadingCallback(navigation::nav message){
+		  has_heading = true;
+  		this->current_heading = message;
+	  }
+
+		ObjectLocateProcedure()
+		: n{},
+			set_heading(n.serviceClient<navigation::nav_request>("/navigation/set_heading")),
+      heading(n.subscribe("/navigation/heading", 1, &ObjectLocateProcedure::updateHeadingCallback, this)),
+      full_stop_srv(n.serviceClient<navigation::full_stop>("/navigation/full_stop")),
+      vision_vector(n.subscribe("/vision/ObjectDetector", 1, &ObjectLocateProcedure::vectorUpdateCallback, this)),
+      has_object_vector(false), has_heading(false), yaw_recorded(false), start_yaw(0.0),
+      x(0), y(0), z(0)
+		{ }
+
+		ObjectLocateProcedure* clone() const override
+		{
+			return new ObjectLocateProcedure(*this);
+		}
+
+		Procedure::ReturnCode operator()() override {
+  		// Ensure the procedure can access the data.
+			if(!has_object_vector) {
+  		  ROS_WARN("OBJECT VECTOR NOT YET AVAILABLE DELAYING UNTIL AVAILABLE.");
+				return Procedure::ReturnCode::CONTINUE;
+			}
+
+      if(!has_heading) {
+        ROS_WARN("ORIENTATION NOT YET AVAILABLE DELAYING UNTIL AVAILABLE.");
+        return Procedure::ReturnCode::CONTINUE;
+      }
+
+			// Set a new heading towards the object
+
+      //TO DO: Set yaw rate and rotate sub to same direction as vision-vector. Might have to adjust this on a sine function to keep the sub from going nuts.
+      // and adjust depth based on z and the distance to the oject, unless that is ok as it is.
+      // Once the yaw is set and the sub rotates (see rotation example below), Then STOP.
+      // Then we will return NEXT (forward procedure to go forward to the object).
 
 			navigation::nav_request srv;
 			srv.request.depth = current_heading.direction.z + z;

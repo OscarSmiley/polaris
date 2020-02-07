@@ -1,11 +1,11 @@
-<?xml version="1.0"?>
+<?xml version="2.0"?>
 <package>
   <name>vision</name>
-  <version>0.1.0</version>
-  <description>Vision core of RedHerring</description>
-  <maintainer email="asinha@uvic.ca">asinha</maintainer>
+  <version>2.0.0</version>
+  <description>Vision core of Polaris</description>
+  <maintainer email="wasmann@uvic.ca">RobWasmann</maintainer>
   <license>BSD</license>
-  
+
   <!-- The tools that we need for compiling -->
   <buildtool_depend>catkin</buildtool_depend>
    <build_depend>cv_bridge</build_depend>

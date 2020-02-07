@@ -2,7 +2,7 @@
 #include "ros/console.h"
 //#include <type_traits>
 
-// TODO: Determine if a need for more than one camera exists. However, the implementation most 
+// TODO: Determine if a need for more than one camera exists. However, the implementation most
 // likely should not be depending on a certain number of cameras attached.
 CameraInput::CameraInput() : input_front(1)
 {
@@ -16,7 +16,7 @@ bool CameraInput::update()
     if(!input_front.read(frame_front)) {
         return false;
     }
-    
+
     return true;
 }
 

@@ -40,7 +40,7 @@ generate_messages(
 # And we would uncomment INCLUDE_DIRS, but generally everything happens here
 # SO theres no need (for now)
 catkin_package(
-#  INCLUDE_DIRS include
+# INCLUDE_DIRS include
   #LIBRARIES vision
   CATKIN_DEPENDS cv_bridge image_transport roscpp sensor_msgs message_runtime std_msgs message_generation
 #  DEPENDS system_lib
@@ -59,7 +59,7 @@ include_directories(
 find_package(OpenCV 3 REQUIRED)
 
 # Separate nodes in the package
-add_executable(${PROJECT_NAME}_node src/vision_node.cpp src/CameraInput.cpp src/BuoyDetector.cpp src/GateDetector.cpp src/PathDetector.cpp src/Distance.cpp src/Filter.cpp)
+add_executable(${PROJECT_NAME}_node src/vision_node.cpp src/CameraInput.cpp src/ObjectDetector.cpp src/Distance.cpp src/Filter.cpp)
 add_dependencies(${PROJECT_NAME}_node ${vision_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 #manualy added sender and reciever executables for camera testing

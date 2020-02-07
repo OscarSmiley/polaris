@@ -1,5 +1,5 @@
 {
-    "buoy" : {
+    "object" : {
         "height_px": 100.0,
         "width_px": 20.5,
         "real_height": 2.0,
@@ -14,5 +14,5 @@
         "real_weight": 1.9,
         "real_distance": 40.5
     }
-    
+
 }

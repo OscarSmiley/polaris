@@ -6,6 +6,6 @@
         output="screen"
   >
         <!-- launch-prefix="xterm -e gdb -args" -->
-    <rosparam command="load" file="$(find controlsystem)/config/test.yaml"/>
+    <rosparam command="load" file="$(find controlsystem)/config/DiveSurface.yaml"/>
   </node>
 </launch>

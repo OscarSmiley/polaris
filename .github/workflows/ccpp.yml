@@ -1,0 +1,32 @@
+name: ROS CI Build
+
+on:
+  push:
+    branches:
+      - 'master'
+      - 'development'
+  pull_request:
+    branches:
+      - 'master'
+      - 'development'
+    
+jobs:
+  build:
+
+    runs-on: ubuntu-16.04
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install ROS 
+      run: | 
+        sudo bash -c 'cat /etc/apt/sources.list'
+        sudo bash -c 'echo "deb http://packages.ros.org/ros/ubuntu xenial main" >> /etc/apt/sources.list.d/ros-latest.list'
+        sudo bash -c 'apt-key adv --keyserver "hkp://keyserver.ubuntu.com:80" --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654'
+        sudo bash -c 'apt-get update && apt-get install -y ros-kinetic-desktop-full'
+        sudo bash -c 'apt-get install -y ros-kinetic-serial ros-kinetic-cv-bridge ros-kinetic-web-video-server ros-kinetic-rosbridge-suite fftw3 fftw3-dev pkg-config'
+        sudo bash -c 'rosdep init && rosdep update'
+    - name: Build ROS Project
+      run: |
+        sudo bash -c 'source /opt/ros/kinetic/setup.bash' 
+        sudo bash -c 'cd ros/ && ./env.sh'
+        sudo bash -c 'source /opt/ros/kinetic/setup.bash && cd ros/ && catkin_make'

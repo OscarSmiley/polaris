@@ -19,13 +19,13 @@
   <!-- Vision Nodes -->
 
   <!-- Computer Vision -->
-  <include file="$(find vision)/launchfiles/vision.launch"> 
+  <include file="$(find vision)/launchfiles/vision.launch">
   </include>
- 
+
 
   <!-- Webgui -->
-  <!-- include file="$(find webgui)/webgui.launch"-->
-  <!--/include-->
+  <include file="$(find webgui)/webgui.launch">
+  </include>
 
   <!-- Control Nodes -->
 
@@ -48,7 +48,7 @@
   <!-- include file="$(find navigation)/launchfiles/rpm_controller.launch"/-->
 
   <!-- group if="$(arg record)"-->
-    <!-- node name="rosbag" pkg="rosbag" type="record"  args="-o $(arg save_location) -a -x /video/(.*)"/--> 
+    <!-- node name="rosbag" pkg="rosbag" type="record"  args="-o $(arg save_location) -a -x /video/(.*)"/-->
   <!-- /group-->
-  
+
 </launch>
