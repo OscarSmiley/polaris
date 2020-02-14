@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   message_generation
+  cv_bridge 
 )
 
 
@@ -29,6 +30,8 @@ include_directories(
 ##############################################################################
 # Binaries                                                                   #
 ##############################################################################
+find_package(OpenCV 3 REQUIRED)
+
 add_executable(sender src/sender.cpp)
 add_dependencies(sender ${webgui_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(sender ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
