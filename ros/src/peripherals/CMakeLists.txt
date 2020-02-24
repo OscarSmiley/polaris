@@ -15,16 +15,16 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 add_service_files(
-   FILES
-   motor.srv
-   motors.srv
-   power_enable.srv
-   avg_data.srv
-   hydro_data.srv
-   set_vel.srv
-   hydro_ffts.srv
-   hydro_phases.srv
-   get_motor_enums.srv
+  FILES
+  motor.srv
+  motors.srv
+  power_enable.srv
+  avg_data.srv
+  hydro_data.srv
+  set_vel.srv
+  hydro_ffts.srv
+  hydro_phases.srv
+  get_motor_enums.srv
 )
 
 add_message_files(
@@ -49,17 +49,25 @@ generate_messages(
 
 catkin_package(
 #  INCLUDE_DIRS include
-  #LIBRARIES peripherals
+  LIBRARIES peripherals
   CATKIN_DEPENDS message_generation roscpp rospy std_msgs message_runtime
 #  DEPENDS system_lib
 )
 
+## Declare a C++ library
+add_library(${PROJECT_NAME}
+  src/serial_protocol.cpp
+)
+
 include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
   ${dsp_INCLUDE_DIRS}
 )
 
 find_package(serial REQUIRED)
+
+find_package(peripherals REQUIRED)
 
 add_executable(depth_sensor src/depth_sensor_node.cpp)
 target_link_libraries(depth_sensor ${catkin_LIBRARIES})
@@ -70,7 +78,7 @@ target_link_libraries(motor_controller ${catkin_LIBRARIES} ${serial_LIBRARIES})
 add_dependencies(motor_controller monitor_generate_messages_cpp peripherals_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 
 add_executable(power_board src/power_board.cpp)
-target_link_libraries(power_board ${catkin_LIBRARIES} ${serial_LIBRARIES})
+target_link_libraries(power_board ${catkin_LIBRARIES} ${serial_LIBRARIES} ${peripherals_LIBRARIES})
 add_dependencies(power_board monitor_generate_messages_cpp peripherals_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 
 add_executable(imu src/imu.cpp)
