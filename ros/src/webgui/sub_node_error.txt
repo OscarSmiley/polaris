@@ -1,0 +1,117 @@
+... logging to /home/nvidia/.ros/log/6379f352-59f1-11ea-af10-00044ba55619/roslaunch-tegra-ubuntu-10917.log
+Checking log directory for disk usage. This may take awhile.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+
+started roslaunch server http://tegra-ubuntu:41055/
+
+SUMMARY
+========
+
+PARAMETERS
+ * /front_camera/fd: /dev/video1
+ * /front_camera/fps: 1
+ * /front_camera/is_device: True
+ * /front_camera/topic_name: front_camera
+ * /rosapi/params_glob: [*]
+ * /rosapi/services_glob: [*]
+ * /rosapi/topics_glob: [*]
+ * /rosdistro: kinetic
+ * /rosversion: 1.12.14
+
+NODES
+  /
+    front_camera (webgui/sender)
+    rosapi (rosapi/rosapi_node)
+    roslibjs (rosbridge_server/rosbridge_websocket)
+    web_video_server (web_video_server/web_video_server)
+    webserver (webgui/server.py)
+
+auto-starting new master
+process[master]: started with pid [10928]
+ROS_MASTER_URI=http://localhost:11311
+
+setting /run_id to 6379f352-59f1-11ea-af10-00044ba55619
+process[rosout-1]: started with pid [10941]
+started core service [/rosout]
+process[web_video_server-2]: started with pid [10950]
+process[roslibjs-3]: started with pid [10959]
+process[webserver-4]: started with pid [10960]
+process[rosapi-5]: started with pid [10961]
+process[front_camera-6]: started with pid [10963]
+127.0.0.1 - - [27/Feb/2020 22:13:53] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:13:53] "GET /bootstrap-3.3.7-dist/css/bootstrap.min.css HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:13:53] "GET /css/custom.css HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:13:53] "GET /js/libraries/eventemitter2.min.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:13:53] "GET /js/libraries/roslib.min.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:13:53] "GET /js/controller.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:13:53] "GET /js/keyboard.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:13:53] "GET /js/find_video_feeds.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:13:53] "GET /js/topics/power_board.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:13:53] "GET /bootstrap-3.3.7-dist/js/jquery-3.3.1.min.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:13:53] "GET /bootstrap-3.3.7-dist/js/bootstrap.min.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:13:53] "GET /js/services/power_board_services.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:13:53] "GET /js/services/imu_vector_reset.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:13:53] "GET /js/services/calibrate_depth.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:13:53] "GET /js/services/control_system_enable.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:13:53] "GET /js/topics/nav.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:13:53] "GET /js/helpers/connection.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:13:53] "GET /html_includes/headers.html HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:13:53] "GET /favicon.ico HTTP/1.1" 200 -
+[ERROR] [1582870434.675493]: [Client 1] [id: subscribe:/nav/navigation:3] subscribe: Unable to import msg class nav_request from package navigation. Caused by 'module' object has no attribute 'nav_request'
+127.0.0.1 - - [27/Feb/2020 22:13:54] "HEAD /?rand=7687 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:13:55] "HEAD /?rand=4753 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:13:56] "HEAD /?rand=848 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:13:57] "HEAD /?rand=5164 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:13:57] "GET /video.html HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:14:00] "GET /system.html HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:14:00] "GET /js/ros_out.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:14:00] "GET /js/topics/onboard_sys_info.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:14:00] "GET /js/services/get_devices.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Feb/2020 22:14:00] "GET /js/topics/imu.js HTTP/1.1" 200 -
+[ERROR] [1582870440.249012]: [Client 3] [id: call_service:/serial_manager/GetAllDevices:5] call_service InvalidServiceException: Service /serial_manager/GetAllDevices does not exist
+[ERROR] [1582870440.270313]: [Client 3] [id: subscribe:/nav/navigation:7] subscribe: Unable to import msg class nav_request from package navigation. Caused by 'module' object has no attribute 'nav_request'
+127.0.0.1 - - [27/Feb/2020 22:14:01] "HEAD /?rand=1799 HTTP/1.1" 200 -
+[WARN] [1582870441.537848]: Inbound TCP/IP connection failed: connection from sender terminated before handshake header received. 0 bytes were received. Please check sender for additional details.
+^C[front_camera-6] killing on exit
+[rosapi-5] killing on exit
+[webserver-4] killing on exit
+[roslibjs-3] killing on exit
+[web_video_server-2] killing on exit
+Traceback (most recent call last):
+  File "/usr/lib/python2.7/SocketServer.py", line 290, in _handle_request_noblock
+    self.process_request(request, client_address)
+  File "/usr/lib/python2.7/SocketServer.py", line 318, in process_request
+    self.finish_request(request, client_address)
+  File "/usr/lib/python2.7/SocketServer.py", line 331, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/usr/lib/python2.7/SocketServer.py", line 652, in __init__
+    self.handle()
+  File "/usr/lib/python2.7/BaseHTTPServer.py", line 340, in handle
+    self.handle_one_request()
+  File "/usr/lib/python2.7/BaseHTTPServer.py", line 310, in handle_one_request
+    self.raw_requestline = self.rfile.readline(65537)
+  File "/usr/lib/python2.7/socket.py", line 480, in readline
+    data = self._sock.recv(self._rbufsize)
+  File "/home/nvidia/Documents/auvic/personal/oscar/polaris/ros/src/webgui/server.py", line 18, in signal_handler
+    sys.exit(0)
+SystemExit: 0
+Traceback (most recent call last):
+  File "/home/nvidia/Documents/auvic/personal/oscar/polaris/ros/src/webgui/server.py", line 26, in <module>
+    httpd.serve_forever()
+  File "/usr/lib/python2.7/SocketServer.py", line 231, in serve_forever
+    poll_interval)
+  File "/usr/lib/python2.7/SocketServer.py", line 150, in _eintr_retry
+    return func(*args)
+  File "/usr/lib/python2.7/SocketServer.py", line 456, in fileno
+    return self.socket.fileno()
+  File "/usr/lib/python2.7/socket.py", line 228, in meth
+    return getattr(self._sock,name)(*args)
+  File "/usr/lib/python2.7/socket.py", line 174, in _dummy
+    raise error(EBADF, 'Bad file descriptor')
+socket.error: [Errno 9] Bad file descriptor
+[rosout-1] killing on exit
+[master] killing on exit
+shutting down processing monitor...
+... shutting down processing monitor complete
+done

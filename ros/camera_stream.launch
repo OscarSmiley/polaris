@@ -8,7 +8,7 @@
     <include file="$(find webgui)/camera_stream.launch">
          <arg name="node_name" value="$(arg front_camera)"/>
          <arg name="fps" value="1"/>
-         <arg name="fd" value="/dev/video0"/>
+         <arg name="fd" value="/dev/video1"/>
          <arg name="record" value="$(arg record)"/>
     </include>
 

@@ -1,10 +1,10 @@
-<launch>        
-        <!-- Transplant from Polaris_2018 -->
+<launch>
+     <!-- Transplant from Polaris_2018 -->
 	<!-- the dev version does not have some of the required arguments -->
 	<!-- Vision Node -->
         <arg name="record" default="false"/>
         <arg name="node_name" default="top_face_cam"/>
-        <arg name="save_location" default="$(env HOME)/rosbag/$(arg node_name)_"/> 
+        <arg name="save_location" default="$(env HOME)/rosbag/$(arg node_name)_"/>
         <arg name="fps" default="10"/>
         <arg name="fd" default="/dev/video0"/>
         <arg name="is_device" default="true"/>
