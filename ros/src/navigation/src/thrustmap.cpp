@@ -65,7 +65,7 @@ private:
     double max_linear_rate;
 
     std::vector<double> rpms;
-    
+
     /*
     Top looking down view:
     For calculating system E only
@@ -114,7 +114,7 @@ void thrust_controller::do_thrust_matrix(double tau[E_MATRIX_COLUMNS], double th
 double thrust_controller::thrust_to_rpm(double thrust){
     //forward: thrust = (rpm^2) * 0.00000389750967963493  -> thrust is in newtons
     //reverse: thrust = (rpm^2) * -0.00000396914500683942  -> thrust is in newtons
-    
+
     double rpm = 0.0;
     if(thrust > 0){
         rpm = sqrt(thrust / RPM_FORWARD_SQ_COEFF);
@@ -137,13 +137,13 @@ double thrust_controller::thrust_to_rpm(double thrust){
 void thrust_controller::generate_thrust_val(const navigation::nav::ConstPtr &msg)
 {
     double tau[E_MATRIX_COLUMNS] = {
-        msg->direction.x * VEL_X_MUL / this->max_linear_rate, 
-        msg->direction.y * VEL_Y_MUL / this->max_linear_rate, 
-        msg->direction.z * VEL_Z_MUL / this->max_linear_rate, 
+        msg->direction.x * VEL_X_MUL / this->max_linear_rate,
+        msg->direction.y * VEL_Y_MUL / this->max_linear_rate,
+        msg->direction.z * VEL_Z_MUL / this->max_linear_rate,
         msg->orientation.roll * ROLL_MUL / this->max_angular_rate,
         msg->orientation.pitch * PITCH_MUL / this->max_angular_rate,
         msg->orientation.yaw * YAW_MUL / this->max_angular_rate
-    };   
+    };
     double thruster_vals[Motor_Num] = {0.0};
     this->do_thrust_matrix(tau, thruster_vals);
 
@@ -170,7 +170,7 @@ int main(int argc, char **argv)
     thrust_controller tc("motor_controller");
     ros::Subscriber joy = nh.subscribe<navigation::nav>
         ("/navigation/heading", 1, &thrust_controller::generate_thrust_val, &tc);
-    
+
     ros::spin();
 
     return 0;

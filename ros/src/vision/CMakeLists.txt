@@ -3,7 +3,7 @@
 ##############################################################################
 cmake_minimum_required(VERSION 2.8.3)
 project(vision)
-set(CMAKE_CXX_FLAGS "-std=c++11")
+set(CMAKE_CXX_FLAGS "-Wall -std=c++11 -DCMAKE_BUILD_TYPE=Debug")
 
 ##############################################################################
 # Catkin                                                                     #

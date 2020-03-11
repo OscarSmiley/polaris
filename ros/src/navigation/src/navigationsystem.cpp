@@ -122,16 +122,27 @@ public:
 		peripherals::avg_data srv;
 		srv.request = request;
 
-		// Wait 10s until power_board is ready
-		ros::service::waitForService("/power_board/AverageExtPressure", 10.0);
+		// Wait until power_board is ready
+    //ros::service::waitForService("/power_board/AverageExtPressure", -1);
 
-		ros::ServiceClient external_pressure = nodeHandle_.serviceClient<peripherals::avg_data>("/power_board/AverageExtPressure");
+		try {
 
-		if(!external_pressure.call(srv))
-		{
-			ROS_ERROR("Failed to acquire external pressure data during depth calibration.");
-			return false;
-    }
+			// Wait 10s until power_board is ready
+	  	ros::service::waitForService("/power_board/AverageExtPressure", 10.0);
+
+			ros::ServiceClient external_pressure = nodeHandle_.serviceClient<peripherals::avg_data>("/power_board/AverageExtPressure");
+			if(!external_pressure)
+			{
+				ROS_ERROR("Failed to acquire external pressure data during depth calibration.");
+				return false;
+			}
+
+		} catch (std::exception const &ex){
+
+			ROS_ERROR("Exception: %s", ex.what());
+
+		}
+
 
     response = srv.response;
 
@@ -141,11 +152,37 @@ public:
     return true;
 	}
 
+	bool calibrateDepth()
+	{
+		peripherals::avg_data::Request request;
+		peripherals::avg_data srv;
+		srv.request = request;
+
+		try {
+
+			// Wait 10s until power_board is ready, timeout is in milliseconds.
+			ros::service::waitForService("/power_board/AverageExtPressure", 10000);
+
+			ros::ServiceClient external_pressure = nodeHandle_.serviceClient<peripherals::avg_data>("/power_board/AverageExtPressure");
+			if(!external_pressure.call(srv))
+			{
+				ROS_ERROR("Failed to acquire external pressure data during depth calibration.");
+				return false;
+			}
+
+		} catch (std::exception const &ex){
+
+			ROS_ERROR("Exception: %s", ex.what());
+
+		}
+		depthCalibrated_ = true;
+    return true;
+	}
+
 	void updateDepth(navigation::depth_info& message)
 	{
 		if(!depthCalibrated_)
 		{
-			ROS_WARN("Depth must be calibrated before issuing commands to the navigation system.");
 			return;
 		}
 		message.desired_depth = currentControlRequest_.depth;
@@ -157,7 +194,6 @@ public:
 	{
 		if(!depthCalibrated_)
 		{
-			ROS_WARN("Depth must be calibrated before issuing commands to the navigation system.");
 			return;
 		}
 
@@ -293,6 +329,9 @@ public:
 	int operator()()
 	{
 		int status = 0;
+
+		calibrateDepth();
+
 		while(ros::ok())
 		{
 			// Update heading.
@@ -303,7 +342,7 @@ public:
 			// Update depth.
 			navigation::depth_info depth_message;
 			updateDepth(depth_message);
-			depth_.publish(heading_message);
+			depth_.publish(depth_message);
 
 			ros::spinOnce();
 			loopRate_.sleep();
@@ -323,4 +362,8 @@ int main(int argc, char** argv)
 
 	NavigationSystem navigationSystem(nh);
 
+	int return_code = navigationSystem();
+
+  ros::shutdown();
+  return return_code;
 }

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(navigation)
-set(CMAKE_CXX_FLAGS "-std=c++11")
+set(CMAKE_CXX_FLAGS "-Wall -std=c++11 -DCMAKE_BUILD_TYPE=Debug")
 
 find_package(catkin REQUIRED COMPONENTS
   message_generation
@@ -51,7 +51,7 @@ catkin_package(
 
 
 include_directories(
-  include 
+  include
   ${catkin_INCLUDE_DIRS}
   ${dsp_INCLUDE_DIRS}
 )

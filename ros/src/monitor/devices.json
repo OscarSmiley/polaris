@@ -2,19 +2,19 @@
     "imu" : {
 	"ignore" : false,
         "baud" : 38400,
-        "ack_message" : "0xF1",
-        "ack_response" : "0xF10B780C69",
+        "ack_message" : "F1",
+        "ack_response" : "F10B780C69",
         "timeout": 100,
 	"retry_count" : 1,
         "convert_to_bytes" : true,
         "size_of_message" : 1,
         "size_of_response" : 5,
-        "big_endian_message": true,
-        "big_endian_response" : true
+        "big_endian_message": false,
+        "big_endian_response" : false
     },
 
     "power_board" : {
-        "ignore" : false,
+        "ignore" : true,
         "baud" : 115200,
         "ack_message" : "0200000400",
         "ack_response" : "0A0000295057525F4252440000",
@@ -38,7 +38,7 @@
     },
 
     "motor_controller" : {
-	"ignore" : false,
+	"ignore" : true,
         "baud" : 9600,
         "ack_message" : "RID\n",
         "ack_response" : "Motor Controller\r\n",
@@ -46,5 +46,5 @@
 	"retry_count" : 20,
         "convert_to_bytes" : false
     }
-    
+
 }

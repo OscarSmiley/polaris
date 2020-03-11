@@ -6,8 +6,8 @@
 position_controller::position_controller(double min_vel, double max_vel, double min_pos, double max_pos,
         double dt, double Kpp, double Kip, double Kpv, double Kiv):
     velocity_desired(0),
-    min_pos(min_pos),
-    max_pos(max_pos)
+    max_pos(max_pos),
+    min_pos(min_pos)
 {
     // Initialize PI controller for position
     this->position_pi = new PID(dt, max_pos, min_pos, Kpp, 0.0, Kip);
@@ -31,7 +31,7 @@ double position_controller::calculate(double position_desired, double position_a
     // Get PI result from positional PI controller
     double position_correction = this->position_pi->calculate(position_desired, position_actual);
 
-    // Take derivative of positional correction to get a velocity 
+    // Take derivative of positional correction to get a velocity
     double derivative = this->position_derivator->calculate(position_correction, 0);
 
     // Special case occurs when the position correction hits the rails. The derivative goes to 0
@@ -46,7 +46,7 @@ double position_controller::calculate(double position_desired, double position_a
 }
 
 void position_controller::reset()
-{       
+{
     this->velocity_desired = 0;
     this->position_pi->reset();
     this->position_derivator->reset();
@@ -73,6 +73,6 @@ double velocity_controller::calculate(double velocity_desired, double velocity_a
 }
 
 void velocity_controller::reset()
-{       
-    velocity_pi->reset(); 
+{
+    velocity_pi->reset();
 }

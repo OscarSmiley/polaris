@@ -3,7 +3,7 @@
 #####################################################################################
 cmake_minimum_required(VERSION 2.8.3)
 project(monitor)
-set(CMAKE_CXX_FLAGS "-std=c++11")
+set(CMAKE_CXX_FLAGS "-Wall -std=c++11 -DCMAKE_BUILD_TYPE=Debug")
 set(Boost_USE_MULTITHREADED OFF)
 #####################################################################################
 # Catkin                                                                            #
@@ -36,7 +36,7 @@ add_message_files(
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
    DEPENDENCIES
-   std_msgs  # Or other packages containing 
+   std_msgs  # Or other packages containing
 )
 
 catkin_package(

@@ -11,10 +11,10 @@
 
   <!-- Peripheral/Monitor Nodes -->
   <include file="$(find monitor)/launchfiles/serial.launch"/>
-  <include file="$(find peripherals)/launchfiles/motors.launch"/>
+  <!--include file="$(find peripherals)/launchfiles/motors.launch"/-->
   <include file="$(find peripherals)/launchfiles/imu.launch"/>
-  <include file="$(find peripherals)/launchfiles/power_board.launch"/>
-  <!-- include file="$(find peripherals)/launchfiles/hydrophones.launch"/-->
+  <!--include file="$(find peripherals)/launchfiles/power_board.launch"/-->
+  <include file="$(find peripherals)/launchfiles/hydrophones.launch"/>
 
   <!-- Vision Nodes -->
 
@@ -35,20 +35,21 @@
 
   <!-- Navigation Nodes -->
   <!-- Navigation System -->
-  <!-- include file="$(find navigation)/launchfiles/navigationsystem.launch"-->
-    <!-- arg name="max_linear_vel" value="$(arg max_linear_vel)"/-->
-    <!-- arg name="max_angular_vel" value="$(arg max_angular_vel)"/-->
-  <!-- /include-->
+  <include file="$(find navigation)/launchfiles/navigationsystem.launch">
+    <arg name="max_linear_vel" value="$(arg max_linear_vel)"/>
+    <arg name="max_angular_vel" value="$(arg max_angular_vel)"/>
+  </include>
 	<!-- Thrustmap Node -->
-  <!-- include file="$(find navigation)/launchfiles/thrustmap.launch"-->
-    <!-- arg name="max_linear_vel" value="$(arg max_linear_vel)"/-->
-    <!-- arg name="max_angular_vel" value="$(arg max_angular_vel)"/-->
-  <!-- /include-->
+  <include file="$(find navigation)/launchfiles/thrustmap.launch">
+    <arg name="max_linear_vel" value="$(arg max_linear_vel)"/>
+    <arg name="max_angular_vel" value="$(arg max_angular_vel)"/>
+  </include>
 	<!-- RPM Controller -->
-  <!-- include file="$(find navigation)/launchfiles/rpm_controller.launch"/-->
+  <include file="$(find navigation)/launchfiles/rpm_controller.launch">
+  </include>
 
-  <!-- group if="$(arg record)"-->
-    <!-- node name="rosbag" pkg="rosbag" type="record"  args="-o $(arg save_location) -a -x /video/(.*)"/-->
-  <!-- /group-->
+  <group if="$(arg record)">
+    <node name="rosbag" pkg="rosbag" type="record"  args="-o $(arg save_location) -a -x /video/(.*)"/>
+  </group>
 
 </launch>
